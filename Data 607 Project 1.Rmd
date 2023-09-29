@@ -1,0 +1,119 @@
+---
+title: "Project 1 Data 607"
+output: html_document
+date: "2023-09-21"
+---
+Step 1: Loading the text file, which has been uploaded to GitHub, and the link has been pasted to R markdown.
+```{r}
+# Load necessary libraries
+library(dplyr)
+library(tidyverse)
+
+# Import chess tournament data from GitHub repository
+chess_data <- read.table(url("https://raw.githubusercontent.com/NooriSelina/Data-607/main/%20tournamentinfo.txt"), skip = 4, sep = ",")
+head(data)
+```
+
+Step 2: Data Extraction and Transformation - During this step, the essential information from the chess tornament dataset was extracted. Empty containers were created to store the variables such as player IDs, names, total points, and individual round scores. Using the chess_substr function, helped to extract the scores from the text. Then using a loop, the necessary information was extracted from each of the rows. Using the extracted data, a data frame was created by putting the information into a table format. 
+
+```{r}
+# Create empty vectors to store extracted data
+player_id <- c()
+player_name <- c()
+total_points <- c()
+round1 <- c()
+round2 <- c()
+round3 <- c()
+round4 <- c()
+round5 <- c()
+round6 <- c()
+round7 <- c()
+
+# Function to extract round scores from a string
+chess_substr <- function(str) {
+  return(strtoi(substr(str, 4, 5)))
+}
+
+# Loop through the rows and extract relevant data
+for (x in seq(from = 1, to = nrow(chess_data), by = 3)) {
+  row <- unlist(strsplit(chess_data[x,], "|", fix = TRUE))
+  player_id <- c(player_id, trimws(row[1]))
+  player_name <- c(player_name, trimws(row[2]))
+  total_points <- c(total_points, as.double(trimws(row[3])))
+  round1 <- c(round1, chess_substr(row[4]))
+  round2 <- c(round2, chess_substr(row[5]))
+  round3 <- c(round3, chess_substr(row[6]))
+  round4 <- c(round4, chess_substr(row[7]))
+  round5 <- c(round5, chess_substr(row[8]))
+  round6 <- c(round6, chess_substr(row[9]))
+  round7 <- c(round7, chess_substr(row[10]))
+}
+
+# Convert round scores to character
+round1 <- as.character(round1)
+round2 <- as.character(round2)
+round3 <- as.character(round3)
+round4 <- as.character(round4)
+round5 <- as.character(round5)
+round6 <- as.character(round6)
+round7 <- as.character(round7)
+
+# Create a data frame with extracted data
+chess_table <- data.frame(
+  Player_ID = player_id,
+  Player_Name = player_name,
+  Total_Points = total_points,
+  Round_1 = round1,
+  Round_2 = round2,
+  Round_3 = round3,
+  Round_4 = round4,
+  Round_5 = round5,
+  Round_6 = round6,
+  Round_7 = round7
+)
+```
+
+Step 3: In this step, the data was reorganized using `pivot_longer` to reshape it for analysis. Additionally, a table of player ratings was created and merged with the reshaped data, associating players with their respective ratings. The calculation of the average pre-chess rating of opponents for each player was performed, providing insights into player performance relative to their opponents' ratings during the chess tournament. Finally, the results were saved in a CSV file named "chess_ratings.csv" for further analysis.
+
+```{r}
+# Use pivot_longer to reshape the data
+chess_long <- chess_table %>%
+  pivot_longer(
+    cols = starts_with("Round"), 
+    names_to = "Round", 
+    values_to = "Opponent_ID"
+  ) %>%
+  filter(!is.na(Opponent_ID)) 
+
+# Create a table of player ratings
+player_ratings <- chess_table %>%
+  select(Player_ID = Player_ID, Player_Rating = Total_Points)
+
+# Merge player_ratings with chess_long based on Player_ID
+chess_long <- chess_long %>%
+  left_join(player_ratings, by = "Player_ID")
+
+# Calculate the average pre-chess rating of opponents
+chess_results <- chess_long %>%
+  group_by(Player_ID, Player_Name, Total_Points, Player_Rating) %>%
+  summarize(Avg_Pre_Chess_Rating_of_Opponents = mean(Player_Rating, na.rm = TRUE)) %>%
+  ungroup()
+
+# Display the first few rows of the final data frame
+head(chess_results)
+
+# Save the data to a CSV file
+write.csv(chess_results, "chess_ratings.csv", row.names = FALSE)
+```
+Checking if the csv file exists 
+```{r}
+# Check if the CSV file exists in the working directory
+file_list <- list.files()
+if ("chess_ratings.csv" %in% file_list) {
+  cat("CSV file 'chess_ratings.csv' exists in the working directory.\n")
+} else {
+  cat("CSV file 'chess_ratings.csv' does not exist in the working directory.\n")
+}
+
+```
+
