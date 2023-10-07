@@ -1,0 +1,98 @@
+---
+title: "Noori Selina R HW 2"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+date: "2023-07-19"
+---
+Reading data of people with Schizophrenia/ Schizoaffective Disorder
+
+1. Use the summary function to gain an overview of the data set. 
+```{r}
+# Load required library
+library(readr)
+
+# Load the dataset from the URL without specifying col_types
+url <- "https://vincentarelbundock.github.io/Rdatasets/csv/heplots/NeuroCog.csv"
+neuro_cog <- read_csv(url)
+
+#Use the summary function to gain an overview of the data set
+summary(neuro_cog)
+```
+1. (Continued) Then display the mean and median for at least two attributes of your data. Using age and memory. 
+```{r}
+# Calculate the mean and median for the "Age" attribute
+mean_age <- mean(neuro_cog$Age)
+median_age <- median(neuro_cog$Age)
+
+# Calculate the mean and median for the "Memory" attribute
+mean_memory <- mean(neuro_cog$Memory)
+median_memory <- median(neuro_cog$Memory)
+
+# Display the mean and median for the selected attributes
+cat("Mean Age:", mean_age, "\n")
+cat("Median Age:", median_age, "\n")
+cat("Mean Memory:", mean_memory, "\n")
+cat("Median Memory:", median_memory, "\n")
+```
+2. Create a new data frame with a subset of the columns AND rows.  Make sure to rename the new data set so it simply just doesn’t write it over.
+Creating a subset data, based on Memory scores greater than the median memory score of 41. 
+```{r}
+# Select Columns
+selected_columns <- c("Age", "Memory", "Dx")
+
+# Create the New Data Frame with Subset of Rows and Columns using subset()
+new_data_subset <- subset(neuro_cog, select = selected_columns, Memory > 41)
+
+# Display enough rows to see examples of Step 2
+head(new_data_subset, 10)
+```
+
+3. Create new column names for each column in the new data frame created in step 2. 
+```{r}
+# Create new column names
+new_column_names <- c("ParticipantAge", "MemoryScore", "GroupType")
+
+# Assign the new column names to the data frame
+colnames(new_data_subset) <- new_column_names
+
+# Display 5 rows to see examples of Step 3
+head(new_data_subset, 5)
+```
+
+4. Use the summary function to create an overview of your new data frame created in step 2.  The print the mean and median for the same two attributes.Please compare (i.e. tell me how the values changed and why).
+
+Comparison of Original Data and New Subset Data:
+We compared the original data to a new subset focusing on individuals with Schizophrenia/Schizoaffective disorder and the control group. The subset included only those with memory scores greater than 41. As a result, the mean and median memory scores in the subset data are higher, indicating better memory performance. The mean and median age in the subset data are slightly lower, possibly due to chance or the memory score distribution within specific age groups.
+```{r}
+#Use the summary function to create an overview of the new data frame
+summary(new_data_subset)
+
+#Calculate Mean and Median for Selected Attributes in the new data frame
+mean_participant_age <- mean(new_data_subset$ParticipantAge)
+median_participant_age <- median(new_data_subset$ParticipantAge)
+
+mean_memory_score <- mean(new_data_subset$MemoryScore)
+median_memory_score <- median(new_data_subset$MemoryScore)
+
+#Print Mean and Median for Selected Attributes
+cat("Mean Participant Age (New Data Frame):", mean_participant_age, "\n")
+cat("Median Participant Age (New Data Frame):", median_participant_age, "\n")
+cat("Mean Memory Score (New Data Frame):", mean_memory_score, "\n")
+cat("Median Memory Score (New Data Frame):", median_memory_score, "\n")
+```
+
+5. For at least 3 different/distinct values in a column please rename so that every value in that column is renamed. Changing "schizophrenia to "SZ", "schizoaffective" to "SA" and "control" to "CTL".
+```{r}
+#Rename values in the "GroupType" column
+new_data_subset$GroupType <- gsub("Schizophrenia", "SZ", new_data_subset$GroupType)
+new_data_subset$GroupType <- gsub("Schizoaffective", "SA", new_data_subset$GroupType)
+new_data_subset$GroupType <- gsub("Control", "CTL", new_data_subset$GroupType)
+
+#Display the updated data frame
+new_data_subset
+```
+6. Display enough rows to see examples of all of steps 1-5 above.  This means use a function to show me enough row values that I can see the changes. This has been implemented throughout the code. Could not be applied to step 1 and 4 b/c those required finding the summary. 
+
+
