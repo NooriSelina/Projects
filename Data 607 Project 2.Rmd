@@ -1,0 +1,206 @@
+---
+title: "Data 607 Project 2"
+output:
+  html_document: default
+  pdf_document: default
+date: "2023-10-10"
+---
+
+DATA SET 1: Data set 1 has been created by a classmate regarding basketball players and their scores during the years of 2019-2021.
+```{r}
+# Create the dataset
+data <- data.frame(
+  Player = c("LeBron James", "Stephen Curry", "Kevin Durant"),
+  Team = c("Lakers", "Warriors", "Nets"),
+  Season_2019_Points = c(2000, 1800, 1900),
+  Season_2020_Points = c(2100, 1900, 2000),
+  Season_2021_Points = c(2200, 2000, 2100)
+)
+# Save the dataset as a CSV file
+write.csv(data, "basketball_points.csv", row.names = FALSE)
+
+# The csv has been uploaded to github and imported here
+library(readr)
+
+github_url <- "https://raw.githubusercontent.com/NooriSelina/Data-607/main/basketball_points.csv"
+basketball_data <- read.csv(github_url)
+head(basketball_data)
+```
+
+Next, the data will be made tidy with tidyr and dplyr packages. It will be transformed into "long" format. To perform the analysis of player performance, we calculated the overall mean points scored by each player across all seasons and identified the top-performing players with the highest overall mean points.
+
+```{r}
+library(tidyr)
+library(dplyr)
+
+# Convert the basketball_data to long format
+long_basketball_data <- basketball_data %>%
+  pivot_longer(
+    cols = starts_with("Season_"),
+    names_to = "Season",
+    values_to = "Points"
+  ) %>%
+  arrange(Player, Season)
+
+# Print the long format data
+print(long_basketball_data)
+```
+
+Analysis: To perform the analysis of which players performed the best during the previous seasons, we are calculating the mean values for each player, for each of the seasons. Then, a graph is being produced to visualize the results. 
+
+```{r}
+# Load necessary packages
+library(dplyr)
+library(ggplot2)
+
+# Calculate mean points for each player and season
+mean_points <- long_basketball_data %>%
+  group_by(Player, Season) %>%
+  summarize(Mean_Points = mean(Points))
+
+# Print the mean_points data frame
+print(mean_points)
+
+# Create a bar chart to visualize mean points by player and season
+ggplot(mean_points, aes(x = Season, y = Mean_Points, fill = Player)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(
+    title = "Mean Points by Player and Season",
+    x = "Season",
+    y = "Mean Points",
+    fill = "Player"
+  ) +
+  theme_minimal()
+
+```
+Conclusion: In conclusion, the provided data represents the points scored by three prominent basketball players (Kevin Durant, LeBron James, and Stephen Curry) over the course of three consecutive seasons (2019, 2020, and 2021). It illustrates the consistent performance and gradual increase in points scored by all three players over these seasons, with LeBron James who possessed the highest point total by the end of this period.
+
+
+DATA SET 2: The following data set includes regional populations from the years 2000 to 2022. It was already posted as CSV form by classmate. I uploaded the CSV to github, and imported via the github link as below.
+```{r}
+# URL of the raw CSV file on GitHub
+github_url <- "https://raw.githubusercontent.com/NooriSelina/Data-607/main/world_population.csv"
+
+# Read the CSV file from GitHub into a data frame
+world_population_data <- read.csv(github_url)
+
+# Print the first few rows of the imported data
+head(world_population_data)
+```
+
+Next, this wide data set is being changed to long format" using dyplr and tidyr
+
+```{r}
+# Load necessary packages
+library(tidyr)
+library(dplyr)
+
+# Rename columns with special characters
+world_population_data <- world_population_data %>%
+  rename(
+    Rank = Rank,
+    CCA3 = CCA3,
+    Country_Territory = `Country.Territory`,
+    Capital = Capital,
+    Continent = Continent,
+    Population_2022 = `X2022.Population`,
+    Population_2020 = `X2020.Population`,
+    Population_2015 = `X2015.Population`,
+    Population_2010 = `X2010.Population`,
+    Population_2000 = `X2000.Population`,
+    Population_1990 = `X1990.Population`,
+    Population_1980 = `X1980.Population`,
+    Population_1970 = `X1970.Population`,
+    Area_km2 = `Area..km..`,
+    Density_per_km2 = `Density..per.km..`,
+    Growth_Rate = `Growth.Rate`,
+    World_Population_Percentage = `World.Population.Percentage`
+  )
+
+# Convert the World Population dataset to long format
+long_population_data <- world_population_data %>%
+  pivot_longer(
+    cols = starts_with("Population_"),
+    names_to = "Year",
+    values_to = "Population"
+  ) %>%
+  arrange(Country_Territory, Year)  # Arrange by Country/Territory and Year
+
+# Print the first few rows of the long format data
+head(long_population_data)
+```
+Analysis: Analysis: For this analysis, we visualized the total world population trends from 2000 to 2022 using a bar chart. The chart highlights how the global population has evolved over these years, providing a clear overview of population changes over time.
+
+
+```{r}
+# Load necessary packages
+library(dplyr)
+library(ggplot2)
+
+# Calculate the total world population by year
+total_population_by_year <- long_population_data %>%
+  group_by(Year) %>%
+  summarize(Total_Population = sum(Population))
+
+# Create a bar chart to visualize total population by year
+ggplot(total_population_by_year, aes(x = Year, y = Total_Population)) +
+  geom_bar(stat = "identity", fill = "navy") +
+  geom_text(aes(label = Total_Population), vjust = -0.5, hjust = 0.5, size = 3) +  # Add text annotations
+  labs(
+    title = "Total World Population Trends (2000-2022)",
+    x = "Year",
+    y = "Total Population"
+  ) +
+  theme_minimal()
+
+```
+Conclusion: The analysis of world population trends from 2000 to 2022 reveals a consistent and notable pattern: the total population across all countries is on an upward trajectory. Over this period, the global population has demonstrated a clear and continuous increase. 
+
+
+
+DATA SET 3: The following data set consists of the occurrence of diabetes among a group of individuals, encompassing various characteristics such as age, skin thickness, and more. . The data set was downloaded as csv, uploaded to github, and imported to R.
+```{r}
+# URL of the raw CSV file on GitHub
+github_url <- "https://raw.githubusercontent.com/NooriSelina/Data-607/main/diabetes%20(1).csv"
+
+# Read the CSV file from GitHub into a data frame
+diabetes_data <- read.csv(github_url)
+
+# Print the first few rows of the imported data
+head(diabetes_data)
+
+```
+Next, we have changed the format to long data instead of wide data. 
+```{r}
+library(dplyr)
+library(tidyr)
+
+long_diabetes_data <- diabetes_data %>% # Change format to long form
+  pivot_longer(
+    cols = -Outcome,  # Specify the columns to remain as is 
+    names_to = "Measurement",  # Name for the new variable containing column names
+    values_to = "Value"  # Name for the new variable containing the values
+  )
+
+long_diabetes_data
+
+```
+Analysis: An analysis was conducted to investigate the potential relationship between Glucose levels and Age in the dataset. We performed a thorough examination of the data and found no discernible pattern or significant correlation between these two variables. To visually represent this, we created a scatter plot, which clearly illustrates the lack of a meaningful association between Glucose and Age, as data points were widely dispersed across the plot without forming any recognizable trend or pattern.
+
+```{r}
+# Load necessary packages
+library(dplyr)
+library(ggplot2)
+
+# Create a scatter plot to visualize the relationship between Glucose and Age
+ggplot(diabetes_data, aes(x = Age, y = Glucose)) +
+  geom_point(color = "skyblue") +
+  labs(
+    title = "Scatter Plot of Glucose vs. Age",
+    x = "Age",
+    y = "Glucose"
+  ) +
+  theme_minimal()
+
+```
+Conclusion: In conclusion, our analysis of the dataset revealed that there is no substantial correlation between Glucose levels and Age, suggesting that these two variables may not be directly related in the context of diabetes. Further investigations and additional variables may be necessary to uncover more complex interactions contributing to diabetes onset.
